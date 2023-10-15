@@ -2,9 +2,12 @@ package com.admalv.taskmanagersb.controllers;
 
 import com.admalv.taskmanagersb.DTOs.CreateTaskDTO;
 import com.admalv.taskmanagersb.DTOs.ErrorResponseDTO;
+import com.admalv.taskmanagersb.DTOs.TaskResponseDTO;
 import com.admalv.taskmanagersb.DTOs.UpdateTaskDTO;
 import com.admalv.taskmanagersb.entities.TaskEntity;
+import com.admalv.taskmanagersb.services.NotesService;
 import com.admalv.taskmanagersb.services.TaskService;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,9 +18,13 @@ import java.util.List;
 @RequestMapping("/tasks")
 public class TaskController {
     private final TaskService taskService;
+    private final NotesService notesService;
 
-    public TaskController(TaskService taskService) {
+    private ModelMapper modelMapper = new ModelMapper();
+
+    public TaskController(TaskService taskService, NotesService notesService) {
         this.taskService = taskService;
+        this.notesService = notesService;
     }
     @GetMapping("")
     public ResponseEntity<List<TaskEntity>> getTasks(){
@@ -29,12 +36,17 @@ public class TaskController {
     };
 
     @GetMapping("/{id}")
-    public ResponseEntity<TaskEntity>getTaskByID(@PathVariable("id") Integer id){
+    public ResponseEntity<TaskResponseDTO>getTaskByID(@PathVariable("id") Integer id){
         var task = taskService.getTaskById(id);
+        var notes = notesService.getNotesForTask(id);
         if(task == null){
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(task);
+
+        var taskResponse = modelMapper.map(task, TaskResponseDTO.class);
+
+        taskResponse.setNotes(notes);
+        return ResponseEntity.ok(taskResponse);
 
     };
 
@@ -55,6 +67,11 @@ public class TaskController {
             }
             return ResponseEntity.ok(task);
 
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteTask(@PathVariable("id") Integer id){
+        taskService.deleteTaskById(id);
     }
 
     @ExceptionHandler(ParseException.class)

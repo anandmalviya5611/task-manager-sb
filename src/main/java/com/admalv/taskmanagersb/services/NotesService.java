@@ -17,6 +17,7 @@ public class NotesService {
         this.taskService = taskService;
     }
 
+    //encapsulation of two related fields
     class TaskNotesHolder{
         protected int noteId = 1;
         protected ArrayList<NotesEntity> notes = new ArrayList<>();
@@ -29,12 +30,16 @@ public class NotesService {
         TaskEntity task = taskService.getTaskById(taskId);
         //if the task does not exist return null
         if(task == null){
+            System.out.println("1. im trying to get the notes where task is null");
             return null;
         }
+        System.out.println("1. im trying to get the notes where task is not null");
         //if the taskId is a new entry in the hashmap
         if(taskNotesHolderHashMap.get(taskId) == null){
+            System.out.println("did i just enter here?");
             taskNotesHolderHashMap.put(taskId, new TaskNotesHolder());
         }
+        System.out.println("2. going to return the notes" + taskNotesHolderHashMap.get(taskId).noteId);
         //finally return the notes for the taskId
         return taskNotesHolderHashMap.get(taskId).notes;
     }
@@ -43,8 +48,10 @@ public class NotesService {
     public NotesEntity addNotesForTask(int taskId, String title, String body){
         TaskEntity task = taskService.getTaskById(taskId);
         if(task == null){
+            System.out.println("no taskId like that!");
             return null;
         }
+
         if(taskNotesHolderHashMap.get(taskId) == null){
             taskNotesHolderHashMap.put(taskId, new TaskNotesHolder());
         }
@@ -56,16 +63,22 @@ public class NotesService {
         note.setId(taskNotesHolder.noteId);
         note.setTitle(title);
         note.setBody(body);
+        taskNotesHolder.notes.add(note);
         taskNotesHolder.noteId++;
         return note;
 
     }
 
+    public List<NotesEntity> removeNotesById(int taskId, int noteId){
+        var taskNotesHolder = taskNotesHolderHashMap.get(taskId);
 
+        for(NotesEntity note : taskNotesHolder.notes ) {
+            if (note.getId() == noteId) {
+                taskNotesHolder.notes.remove(note);
+            }
+        }
+        return taskNotesHolder.notes;
 
-
-
-
-
+    }
 
 }

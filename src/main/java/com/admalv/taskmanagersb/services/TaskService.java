@@ -61,5 +61,14 @@ public class TaskService {
         return task;
     }
 
+    public void deleteTaskById(int id){
+        for(TaskEntity task: tasks){
+            if(task.getId() == id){
+                tasks.remove(task);
+            }
+        }
+        return;
+    }
+
 
 }

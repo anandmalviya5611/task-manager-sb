@@ -1,6 +1,7 @@
 package com.admalv.taskmanagersb.controllers;
 
 import com.admalv.taskmanagersb.DTOs.CreateNotesDTO;
+import com.admalv.taskmanagersb.DTOs.CreateNotesResponseDTO;
 import com.admalv.taskmanagersb.entities.NotesEntity;
 import com.admalv.taskmanagersb.services.NotesService;
 import org.springframework.http.ResponseEntity;
@@ -21,16 +22,31 @@ public class NotesController {
     @GetMapping("")
     public ResponseEntity<List<NotesEntity>> getNotes(@PathVariable("taskId") Integer taskId){
         var notes = notesService.getNotesForTask(taskId);
+        System.out.println("3. i have finally reached this part!");
         return ResponseEntity.ok(notes);
     }
 
     @PostMapping("")
-    public ResponseEntity<NotesEntity> addNotes(@PathVariable("taskId") Integer taskId, @RequestBody CreateNotesDTO body){
-        var notes = notesService.addNotesForTask(taskId, body.getTitle(), body.getBody());
+    public ResponseEntity<CreateNotesResponseDTO> addNotes(@PathVariable("taskId") Integer taskId, @RequestBody CreateNotesDTO body){
+        var note = notesService.addNotesForTask(taskId, body.getTitle(), body.getBody());
 
-        return ResponseEntity.ok(notes);
-
+        return ResponseEntity.ok(new CreateNotesResponseDTO(taskId, note));
 
     }
 
+    @DeleteMapping("/{noteId}")
+    public ResponseEntity<List<NotesEntity>> deleteNotes(@PathVariable("taskId") Integer taskId, @PathVariable("noteId") Integer noteId){
+        var noteList = notesService.removeNotesById(taskId, noteId);
+
+        return ResponseEntity.ok(noteList);
+    }
+
+
+
+
+
+
 }
+
+
+
