@@ -1,11 +1,13 @@
 package com.admalv.taskmanagersb.services;
 
+import com.admalv.taskmanagersb.DTOs.TaskResponseDTO;
 import com.admalv.taskmanagersb.entities.NotesEntity;
 import com.admalv.taskmanagersb.entities.TaskEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -69,16 +71,28 @@ public class NotesService {
 
     }
 
-    public List<NotesEntity> removeNotesById(int taskId, int noteId){
+    public void removeNotesById(int taskId, int noteId){
         var taskNotesHolder = taskNotesHolderHashMap.get(taskId);
 
-        for(NotesEntity note : taskNotesHolder.notes ) {
-            if (note.getId() == noteId) {
-                taskNotesHolder.notes.remove(note);
+        Iterator<NotesEntity> it = taskNotesHolder.notes.iterator();
+
+        while(it.hasNext()){
+            NotesEntity note = it.next();
+            if(note.getId() == noteId){
+                it.remove();
             }
         }
-        return taskNotesHolder.notes;
 
+    }
+
+    public NotesEntity getANoteById(int taskId, int noteId){
+        var taskNotesHolder = taskNotesHolderHashMap.get(taskId);
+        for(NotesEntity note: taskNotesHolder.notes){
+            if(note.getId() == noteId){
+                return note;
+            }
+        }
+        return null;
     }
 
 }

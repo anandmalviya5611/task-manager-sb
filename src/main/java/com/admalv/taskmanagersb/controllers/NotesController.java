@@ -2,8 +2,11 @@ package com.admalv.taskmanagersb.controllers;
 
 import com.admalv.taskmanagersb.DTOs.CreateNotesDTO;
 import com.admalv.taskmanagersb.DTOs.CreateNotesResponseDTO;
+import com.admalv.taskmanagersb.DTOs.TaskResponseDTO;
 import com.admalv.taskmanagersb.entities.NotesEntity;
 import com.admalv.taskmanagersb.services.NotesService;
+import com.admalv.taskmanagersb.services.TaskService;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,9 +17,14 @@ import java.util.List;
 public class NotesController {
 
     private NotesService notesService;
+    private TaskService taskService;
 
-    public NotesController(NotesService notesService){
+    private ModelMapper modelMapper = new ModelMapper();
+
+    public NotesController(NotesService notesService, TaskService taskService){
+
         this.notesService = notesService;
+        this.taskService = taskService;
     }
 
     @GetMapping("")
@@ -35,15 +43,22 @@ public class NotesController {
     }
 
     @DeleteMapping("/{noteId}")
-    public ResponseEntity<List<NotesEntity>> deleteNotes(@PathVariable("taskId") Integer taskId, @PathVariable("noteId") Integer noteId){
-        var noteList = notesService.removeNotesById(taskId, noteId);
+    public ResponseEntity<TaskResponseDTO> deleteNotes(@PathVariable("taskId") Integer taskId, @PathVariable("noteId") Integer noteId){
+        notesService.removeNotesById(taskId, noteId);
+        var task = taskService.getTaskById(taskId);
+        var notes = notesService.getNotesForTask(taskId);
 
-        return ResponseEntity.ok(noteList);
+        var taskResponse = modelMapper.map(task, TaskResponseDTO.class);
+        taskResponse.setNotes(notes);
+        return ResponseEntity.ok(taskResponse);
     }
 
-
-
-
+    @GetMapping("/{noteId}")
+    public ResponseEntity<CreateNotesDTO> getANote(@PathVariable("taskId") Integer taskId, @PathVariable("noteId") Integer noteId){
+        var noteResponse = notesService.getANoteById(taskId, noteId);
+        var note = modelMapper.map(noteResponse, CreateNotesDTO.class);
+        return ResponseEntity.ok(note);
+    }
 
 
 }
